@@ -11,9 +11,7 @@ constexpr int DisplayWidth = 320;
 constexpr int DisplayHeight = 240;
 constexpr int TileSize = 10;
 
-int main(int argc, const char * argv[]) {
-  int iteration = 10;
-
+void mandelbrot(int iteration, float centerX, float centerY, float zoom) {
   EADK::Display::Color tile[TileSize*TileSize];
 
   for (int tileX=0; tileX<320/TileSize; tileX++) {
@@ -24,7 +22,7 @@ int main(int argc, const char * argv[]) {
           int y = tileY*TileSize + offsetY;
 
           std::complex<float> z = 0;
-          std::complex<float> c = (3.5f*x/319.f-2.5f) + 1if*(-2.5f*y/221.f+1.25f);
+          std::complex<float> c = (3.5f*(x+centerX)/319.f-2.5f)/zoom + 1if*(-2.5f*(y+centerY)/221.f+1.25f)/zoom;
           int i=0;
           while (i < iteration && abs(z) < 2) {
             i++;
@@ -38,4 +36,54 @@ int main(int argc, const char * argv[]) {
     }
   }
   eadk_timing_msleep(1000);
+}
+
+int main(int argc, const char * argv[]) {
+  int iteration = 10;
+  int moveStep = 20;
+  float centerX = 0.0f;
+  float centerY = 0.0f;
+  float zoom = 1.0f;
+
+  mandelbrot(iteration, centerX, centerY, zoom);
+  while (true) {
+    int32_t timeout = 1000;
+    eadk_event_t ev = eadk_event_get(&timeout);
+    switch(ev) {
+      case eadk_event_left:
+        centerX -= moveStep*zoom;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_right:
+        centerX += moveStep*zoom;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_up:
+        centerY -= moveStep*zoom;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_down:
+        centerY += moveStep*zoom;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_plus:
+        zoom *= 1.5f;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_minus:
+        zoom /= 1.5f;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_lower:
+        if (iteration > 1) {
+          iteration--;
+        }
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+      case eadk_event_greater:
+        iteration++;
+        mandelbrot(iteration, centerX, centerY, zoom);
+        break;
+    }
+  }
 }
