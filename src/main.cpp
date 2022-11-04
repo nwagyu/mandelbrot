@@ -7,15 +7,13 @@ extern const uint32_t eadk_api_level __attribute__((section(".rodata.eadk_api_le
 
 using namespace std::complex_literals;
 
-constexpr int DisplayWidth = 320;
-constexpr int DisplayHeight = 240;
 constexpr int TileSize = 10;
 
 void mandelbrot(int iteration, float centerX, float centerY, float zoom) {
   EADK::Display::Color tile[TileSize*TileSize];
 
-  for (int tileX=0; tileX<320/TileSize; tileX++) {
-    for (int tileY=0; tileY<240/TileSize; tileY++) {
+  for (int tileX=0; tileX<EADK_SCREEN_WIDTH/TileSize; tileX++) {
+    for (int tileY=0; tileY<EADK_SCREEN_HEIGHT/TileSize; tileY++) {
       for (int offsetX=0; offsetX<TileSize; offsetX++) {
         for (int offsetY=0; offsetY<TileSize; offsetY++) {
           int x = tileX*TileSize + offsetX;
